@@ -1,43 +1,55 @@
+"""
+CSV Merger
+
+This script combines multiple CSV files into a single large CSV file. The output file includes an
+additional column representing the category, which is derived from the input file names.
+
+Usage:
+    python3 csv_merger.py
+"""
+
 import csv
 import glob
 import re
-import json
 
 
-outcsvfile = "combined_large.csv"
+def get_category_from_filename(filename: str) -> str:
+    """
+    Extract the category from a file name.
+
+    Args:
+        filename: The name of the file.
+
+    Returns:
+        The category as a string.
+    """
+    category = filename.split(".")[0]
+    return " ".join(re.split('-|_', category))
 
 
-with open(outcsvfile, "w", newline='') as output:
-    record_writer = csv.writer(output, lineterminator='\n')
+def merge_csv_files(output_file: str) -> None:
+    """
+    Merge multiple CSV files into a single CSV file.
 
-    # for jsonfile in glob.glob("*.json"):
-    #
-    #     jsonfile_category = jsonfile.split(".")[0]
-    #     jsonfile_category = " ".join(re.split('-|_', jsonfile_category))
-    #
-    #     with open(jsonfile) as f:
-    #         records_list = json.load(f)
-    #         for record_num in range(0, len(records_list)-1):
-    #             print (records_list[record_num])
-    #
-    #             records_list[record_num]["category"] = jsonfile_category
-    #
-    #             writer = csv.writer(output, lineterminator='\n')
-    #             writer.writerow([records_list[record_num]['category'], records_list[record_num]['biz_name'], records_list[record_num]['address'], records_list[record_num]['phone'], records_list[record_num]['url'], records_list[record_num]['email']])
+    Args:
+        output_file: The name of the output file.
+    """
+    with open(output_file, "w", newline='') as output:
+        record_writer = csv.writer(output, lineterminator='\n')
 
-    for csvfilename in glob.glob("*.csv"):
-        print (csvfilename)
-        with open(csvfilename) as csvfile:
-            jsonfile_category = csvfilename.split(".")[0]
-            jsonfile_category = " ".join(re.split('-|_', jsonfile_category))
+        for csv_filename in glob.glob("*.csv"):
+            print(csv_filename)
+            category = get_category_from_filename(csv_filename)
 
-            reader = csv.reader(csvfile, delimiter=',')
-            for row in reader:
-                row.insert(0,jsonfile_category)
-                print(row)
+            with open(csv_filename) as csvfile:
+                reader = csv.reader(csvfile, delimiter=',')
+                for row in reader:
+                    row.insert(0, category)
+                    print(row)
 
-                record_writer.writerow(row)
+                    record_writer.writerow(row)
 
-        csvfile.close()
 
-output.close()
+if __name__ == "__main__":
+    output_csv_file = "combined_large.csv"
+    merge_csv_files(output_csv_file)
